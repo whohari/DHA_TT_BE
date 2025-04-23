@@ -48,6 +48,8 @@ class OneWayTrip(models.Model):
         ('rental', 'rental'),
     ]
     tripType = models.CharField(max_length=20, choices=TRIPTYPECHOICES, default='')
+    totalFare = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
 
     def __str__(self):
         return f"One-way trip from {self.pickupLocation} to {self.dropLocation} on {self.pickupDate} at {self.pickupTime}"
@@ -66,6 +68,8 @@ class RoundTrip(models.Model):
         ('rental', 'rental'),
     ]
     tripType = models.CharField(max_length=20, choices=TRIPTYPECHOICES, default='')
+    totalFare = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
 
     def __str__(self):
         return f"Round trip from {self.pickupLocation} to {self.dropLocation} on {self.pickupDate} at {self.pickupTime}, returning on {self.returnDate}"
@@ -84,6 +88,6 @@ class Rental(models.Model):
     tripType = models.CharField(max_length=20, choices=TRIPTYPECHOICES, default='')
 
     def __str__(self):
-        return f"Rental from {self.pickupLocation} to {self.dropLocation} on {self.pickupDate} at {self.pickupTime} for {self.rentalDuration} days"
+        return f"Rental from {self.pickupLocation} on {self.pickupDate} at {self.pickupTime} for {self.rentalDuration} days"
 
 
