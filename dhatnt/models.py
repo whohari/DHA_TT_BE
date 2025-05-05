@@ -36,6 +36,7 @@ class Vehicle(models.Model):
         return self.name
 
 class OneWayTrip(models.Model):
+    username =models.ForeignKey(UserData, on_delete=models.CASCADE, null=True)
     pickupLocation = models.CharField()
     dropLocation = models.CharField()
     distance = models.DecimalField(max_digits=10, decimal_places=2)
@@ -55,6 +56,7 @@ class OneWayTrip(models.Model):
         return f"One-way trip from {self.pickupLocation} to {self.dropLocation} on {self.pickupDate} at {self.pickupTime}"
 
 class RoundTrip(models.Model):
+    username = models.ForeignKey(UserData, on_delete=models.CASCADE, null=True)
     pickupLocation = models.CharField()
     dropLocation = models.CharField()
     distance = models.DecimalField(max_digits=10, decimal_places=2)
@@ -75,6 +77,7 @@ class RoundTrip(models.Model):
         return f"Round trip from {self.pickupLocation} to {self.dropLocation} on {self.pickupDate} at {self.pickupTime}, returning on {self.returnDate}"
 
 class Rental(models.Model):
+    username = models.ForeignKey(UserData, on_delete=models.CASCADE, null=True)
     pickupLocation = models.CharField()
     pickupDate = models.DateField()
     pickupTime = models.TimeField()
@@ -89,5 +92,3 @@ class Rental(models.Model):
 
     def __str__(self):
         return f"Rental from {self.pickupLocation} on {self.pickupDate} at {self.pickupTime} for {self.rentalDuration} days"
-
-
