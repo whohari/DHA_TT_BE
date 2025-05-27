@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from dhatnt.models import UserData, VehicleType, Vehicle, OneWayTrip, RoundTrip, Rental
+from dhatnt.models import UserData, VehicleType, Vehicle, OneWayTrip, RoundTrip, Rental, OTP
 
 class UsersSerializer(serializers.ModelSerializer):
    class Meta:
@@ -31,3 +31,7 @@ class RentalSerializer(serializers.ModelSerializer):
         model = Rental
         fields = '__all__'
 
+class OTPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OTP
+        fields = ['email', 'code']

@@ -1,6 +1,11 @@
 from rest_framework import permissions, viewsets
-from dhatnt.models import UserData, VehicleType, Vehicle, OneWayTrip, RoundTrip, Rental
-from dhatnt.serializers import UsersSerializer, VehicleTypeSerializer, VehicleSerializer, OneWayTripSerializer, RoundTripSerializer, RentalSerializer
+from dhatnt.models import UserData, VehicleType, Vehicle, OneWayTrip, RoundTrip, Rental,OTP
+from dhatnt.serializers import UsersSerializer, VehicleTypeSerializer, VehicleSerializer, OneWayTripSerializer, RoundTripSerializer, RentalSerializer, OTPSerializer
+from django.core.mail import send_mail
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import OTP
+import logging
 
 # Create your views here.
 class UserViewset(viewsets.ModelViewSet):
@@ -72,3 +77,36 @@ class RentalViewset(viewsets.ModelViewSet):
             queryset = queryset.filter(username_id=user_id)
         return queryset
 
+class SendOTP(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required'}, status=400)
+        otp_instance, _ = OTP.objects.get_or_create(email=email)
+        otp_instance.generate_otp()
+        send_mail(
+            'Your OTP Code',
+            f'Your OTP code is {otp_instance.code}. It will expire in 5 minutes.',
+            'henry7ludwik@gmail.com',
+            [email],
+            fail_silently=False,
+        )
+        return Response({'message': 'OTP sent successfully'})
+
+logger = logging.getLogger(__name__)
+class VerifyOTP(APIView):
+    def post(self, request):
+        try:
+            email = request.data.get('email')
+            otp_code = request.data.get('code')
+            if not email or not otp_code:
+                return Response({'error': 'Email and OTP code are required'}, status=400)
+            otp_instance = OTP.objects.get(email=email, code=otp_code)
+            if otp_instance.is_expired():
+                return Response({'error': 'OTP has expired'}, status=400)
+            return Response({'message': 'OTP verified successfully'}, status=200)
+        except OTP.DoesNotExist:
+            return Response({'error': 'Invalid OTP'}, status=400)
+        except Exception as e:
+            logger.error(f"Unexpected Error: {e}")
+            return Response({'error': f'Server error: {e}'}, status=500)

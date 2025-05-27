@@ -1,5 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+import random
+from datetime import timedelta
+from django.utils.timezone import now
+
 # Create your models here.
 
 class UserData(models.Model):
@@ -92,3 +96,17 @@ class Rental(models.Model):
 
     def __str__(self):
         return f"Rental from {self.pickupLocation} on {self.pickupDate} at {self.pickupTime} for {self.rentalDuration} days"
+
+
+class OTP(models.Model):
+    email = models.EmailField(unique=True)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)  # This is timezone-aware
+
+    def generate_otp(self):
+        self.code = str(random.randint(100000, 999999))
+        self.created_at = now()
+        self.save()
+
+    def is_expired(self):
+        return now() > self.created_at + timedelta(minutes=5)

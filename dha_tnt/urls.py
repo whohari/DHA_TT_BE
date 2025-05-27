@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from dhatnt.views import SendOTP, VerifyOTP
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dha/api/', include('dhatnt.api_urls'))
+    path('dha/api/', include('dhatnt.api_urls')),
+    path('send-otp/', SendOTP.as_view(), name='send_otp'),
+    path('verify-otp/', VerifyOTP.as_view(), name='verify_otp'),
 ]
