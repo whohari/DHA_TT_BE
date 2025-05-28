@@ -1,6 +1,6 @@
 from rest_framework import permissions, viewsets
-from dhatnt.models import UserData, VehicleType, Vehicle, OneWayTrip, RoundTrip, Rental,OTP
-from dhatnt.serializers import UsersSerializer, VehicleTypeSerializer, VehicleSerializer, OneWayTripSerializer, RoundTripSerializer, RentalSerializer, OTPSerializer
+from dhatnt.models import UserData, VehicleType, Vehicle, OneWayTrip, RoundTrip, Rental
+from dhatnt.serializers import UsersSerializer, VehicleTypeSerializer, VehicleSerializer, OneWayTripSerializer, RoundTripSerializer, RentalSerializer
 from django.core.mail import send_mail
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,6 +15,15 @@ class UserViewset(viewsets.ModelViewSet):
     permission_classes = (
         permissions.AllowAny,
     )
+
+    def get_queryset(self):
+        return UserData.objects.filter(id=self.request.user.id)  # Adjust based on your auth system
+
+    def get_queryset(self):
+        email = self.request.query_params.get("email")
+        if email:
+            return UserData.objects.filter(email=email)
+        return UserData.objects.all()
 
 class VehicleTypeViewset(viewsets.ModelViewSet):
     serializer_class = VehicleTypeSerializer
@@ -80,10 +89,13 @@ class RentalViewset(viewsets.ModelViewSet):
 class SendOTP(APIView):
     def post(self, request):
         email = request.data.get('email')
+
         if not email:
             return Response({'error': 'Email is required'}, status=400)
+
         otp_instance, _ = OTP.objects.get_or_create(email=email)
         otp_instance.generate_otp()
+
         send_mail(
             'Your OTP Code',
             f'Your OTP code is {otp_instance.code}. It will expire in 5 minutes.',
@@ -91,7 +103,9 @@ class SendOTP(APIView):
             [email],
             fail_silently=False,
         )
+
         return Response({'message': 'OTP sent successfully'})
+
 
 logger = logging.getLogger(__name__)
 class VerifyOTP(APIView):
